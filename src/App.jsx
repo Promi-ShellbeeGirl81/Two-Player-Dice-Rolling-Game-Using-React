@@ -48,14 +48,20 @@ const App = () => {
   const [diceRoll, setDiceRoll] = useState(null);
 
   const rollDice = () => {
+    // If the current player has no attempts left, switch to the other player
+    if (attempts[currentPlayer] <= 0) {
+      alert(`Player ${currentPlayer + 1} has no attempts left! Switching turns.`);
+      setCurrentPlayer((prev) => (prev === 0 ? 1 : 0));
+      return;
+    }
+  
     const dice = Math.floor(Math.random() * 6) + 1; // Roll dice (1-6)
     setDiceRoll(dice);
-
+  
     // Calculate new position
     let newPosition = players[currentPlayer] + dice;
-
     if (newPosition > BOARD_SIZE) newPosition = BOARD_SIZE;
-
+  
     // Check for special cell effects
     let specialMessage = '';
     if (specialCells[newPosition]) {
@@ -71,33 +77,44 @@ const App = () => {
         });
         specialMessage = `Player ${currentPlayer + 1} ${effect.value > 0 ? 'gained' : 'lost'} ${Math.abs(effect.value)} attempts`;
       }
+  
+      // Remove the special cell effect
+      setSpecialCells((prev) => {
+        const updated = { ...prev };
+        delete updated[newPosition];
+        return updated;
+      });
     }
-
+  
     // Update player position
     setPlayers((prev) => {
       const updated = [...prev];
       updated[currentPlayer] = newPosition;
       return updated;
     });
-
-    // Deduct an attempt and switch turn
+  
+    // Deduct an attempt
     setAttempts((prev) => {
       const updated = [...prev];
       updated[currentPlayer] -= 1;
       return updated;
     });
-
+  
     // Show alert for special cell action
     if (specialMessage) {
       alert(specialMessage); // Alert with the special message
     }
-
+  
+    // Clear dice and switch turn if the current player still has attempts
     setTimeout(() => {
-      setDiceRoll(null); // Clear dice after move
-      setCurrentPlayer((prev) => (prev === 0 ? 1 : 0)); // Switch turn
+      setDiceRoll(null);
+      setCurrentPlayer((prev) => {
+        const otherPlayer = prev === 0 ? 1 : 0;
+        // Switch to the other player only if they have attempts left
+        return attempts[otherPlayer] > 0 ? otherPlayer : prev;
+      });
     }, 1000);
   };
-
   
 
 const resetGame = () => {
@@ -130,18 +147,23 @@ const resetGame = () => {
 
                 return (
                   <div
-                    key={cell}
-                    className={`cell ${isPlayer1 ? 'player1' : ''} ${isPlayer2 ? 'player2' : ''} ${isBothPlayers ? 'both-players' : ''} ${specialCells[cell] ? 'special' : ''}`}
-                  >
-                    {cell}
-                    {specialCells[cell] && (
-                      <div className="special-cell">
-                        {specialCells[cell].type === 'position'
-                          ? `⇅ ${specialCells[cell].value}`
-                          : `⚡ ${specialCells[cell].value}`}
-                      </div>
-                    )}
-                  </div>
+                  key={cell}
+                  className={`cell 
+                    ${isPlayer1 ? 'player1' : ''} 
+                    ${isPlayer2 ? 'player2' : ''} 
+                    ${isBothPlayers ? 'both-players' : ''} 
+                    ${!isPlayer1 && !isPlayer2 && specialCells[cell] ? 'special' : ''}`}
+                >
+                  {cell}
+                  {specialCells[cell] && (
+                    <div className="special-cell">
+                      {specialCells[cell].type === 'position'
+                        ? `⇅ ${specialCells[cell].value}`
+                        : `⚡ ${specialCells[cell].value}`}
+                    </div>
+                  )}
+                </div>
+                
                 );
               })}
             </div>
@@ -162,9 +184,14 @@ const resetGame = () => {
         <p>Dice Roll: {diceRoll || '-'}</p>
       </div>
       <div className="controls">
-        <button onClick={rollDice} disabled={attempts[currentPlayer] <= 0}>
-          Roll Dice (Player {currentPlayer + 1})
-        </button>
+      <button
+  onClick={rollDice}
+  disabled={attempts[0] === 0 && attempts[1] === 0} // Only disable when both players' attempts are 0
+>
+  Roll Dice (Player {currentPlayer + 1})
+</button>
+
+
         <button onClick={resetGame}>New Game</button>
       </div>
     </div>
