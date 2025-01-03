@@ -8,7 +8,7 @@ const GameBoard = ({ board, players, specialCells = {} }) => {
             const isPlayer2 = players[1] === cell;
             const isBothPlayers = isPlayer1 && isPlayer2;
 
-            const specialCell = specialCells[cell]; 
+            const specialCell = specialCells[cell]; // Access specialCells using the cell number
 
             return (
               <div
