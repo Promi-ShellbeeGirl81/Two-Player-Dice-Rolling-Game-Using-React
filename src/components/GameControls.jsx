@@ -8,21 +8,8 @@ const GameControls = () => {
   const { attempts, currentPlayer } = useSelector((state) => state.game);
 
   const handleRollDice = () => {
-    // If both players have no attempts left, show message and disable the button
-    if (attempts[0] === 0 && attempts[1] === 0) {
-      dispatch(setMessage('Both players have no attempts left!'));
-      return;
-    }
-
-    // If the current player has no attempts, immediately switch to the next player
-    if (attempts[currentPlayer] === 0) {
-      dispatch(rollDice()); // Proceed to the next player without rolling for the current player
-      return;
-    }
-
-    // Otherwise, roll the dice
     dispatch(rollDice());
-  };
+  };  
 
   const handleResetGame = () => {
     dispatch(resetGame());

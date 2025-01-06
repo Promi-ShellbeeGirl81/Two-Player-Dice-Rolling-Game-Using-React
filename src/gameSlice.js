@@ -3,8 +3,9 @@ import { createSlice } from '@reduxjs/toolkit';
 const BOARD_SIZE = 100;
 
 const generateSpecialCells = () => {
-  const numSpecialCells = Math.floor(Math.random() * 3) + 7;
+  const numSpecialCells = Math.floor(Math.random() * 3) + 7; 
   const specialCells = {};
+
   Array.from({ length: numSpecialCells }).forEach(() => {
     let cell;
     do {
@@ -13,12 +14,26 @@ const generateSpecialCells = () => {
 
     const effectType = Math.random() > 0.5 ? 'position' : 'attempts';
     let value;
-    if (effectType === 'position') {
-      value = cell >= 90 || cell <= 10 ? Math.floor(Math.random() * 6) : Math.floor(Math.random() * 13) - 6;
-    } else {
-      value = Math.floor(Math.random() * 11) - 5;
-    }
 
+    if (effectType === 'position') {
+      if (cell >= 90) {
+        do {
+          value = Math.floor(Math.random() * 6) - 6; 
+        } while (value === 0); 
+      } else if (cell <= 10) {
+        do {
+          value = Math.floor(Math.random() * 6) + 1; 
+        } while (value === 0); 
+      } else {
+        do {
+          value = Math.floor(Math.random() * 13) - 6; 
+        } while (value === 0); 
+      }
+    } else {
+      do {
+        value = Math.floor(Math.random() * 11) - 5; 
+      } while (value === 0); 
+    }
     specialCells[cell] = { type: effectType, value };
   });
 
@@ -40,7 +55,7 @@ const generateBoard = () => {
 };
 
 
-const generateAttempts = () => [Math.floor(Math.random() * 11) + 10, Math.floor(Math.random() * 11) + 10];
+const generateAttempts = () => [Math.floor(Math.random() * 11 ) + 10, Math.floor(Math.random() * 11) + 10];
 
 const initialState = {
   board: generateBoard(),
@@ -48,7 +63,7 @@ const initialState = {
   players: [0, 0],
   attempts: generateAttempts(),
   currentPlayer: 0,
-  diceRoll: null,
+  diceRoll: [0, 0],
   popupMessage: null,
 };
 
@@ -57,26 +72,23 @@ const gameSlice = createSlice({
   initialState,
   reducers: {
     rollDice: (state) => {
-      // If both players have no attempts left, stop the game
       if (state.attempts[0] === 0 && state.attempts[1] === 0) {
-        state.popupMessage = 'Both players have no attempts left!';
+        state.popupMessage = 'Both players are out of attempts!';
         return;
       }
 
-      // If the current player has no attempts, immediately switch to the next player if the other can still play
-      if (state.attempts[state.currentPlayer] === 0) {
-        state.popupMessage = `Player ${state.currentPlayer + 1} has no attempts left!`;
-        
-        // Check if the other player has attempts left, if so, switch to them
-        if (state.attempts[state.currentPlayer === 0 ? 1 : 0] > 0) {
-          state.currentPlayer = state.currentPlayer === 0 ? 1 : 0;
-        }
-        return; // Skip the dice roll for the current player
+      while (state.attempts[state.currentPlayer] === 0) {
+        state.currentPlayer = state.currentPlayer === 0 ? 1 : 0;
+        if (state.attempts[state.currentPlayer] > 0) break; 
       }
 
-      // Roll the dice if the current player has attempts left
+      if (state.attempts[state.currentPlayer] === 0) {
+        state.popupMessage = 'Both players are out of attempts!';
+        return;
+      }
+
       const dice = Math.floor(Math.random() * 6) + 1;
-      state.diceRoll = dice;
+      state.diceRoll[state.currentPlayer] = dice; 
 
       let newPosition = state.players[state.currentPlayer] + dice;
       if (newPosition > BOARD_SIZE) newPosition = BOARD_SIZE;
@@ -92,15 +104,18 @@ const gameSlice = createSlice({
       }
 
       state.players[state.currentPlayer] = newPosition;
+      
       state.attempts[state.currentPlayer] -= 1;
 
       if (state.attempts[state.currentPlayer] === 0) {
         state.popupMessage = `Player ${state.currentPlayer + 1} is out of attempts!`;
-      }
 
-      // If both players have no attempts left, stop the game
-      if (state.attempts[0] === 0 && state.attempts[1] === 0) {
-        state.popupMessage = 'Both players are out of attempts!';
+        state.currentPlayer = state.currentPlayer === 0 ? 1 : 0;
+        if (state.attempts[state.currentPlayer] === 0) {
+          state.popupMessage = 'Both players are out of attempts!';
+        }
+      } else {
+        state.currentPlayer = state.currentPlayer === 0 ? 1 : 0;
       }
     },
 
@@ -108,7 +123,7 @@ const gameSlice = createSlice({
       state.players = [0, 0];
       state.attempts = generateAttempts();
       state.currentPlayer = 0;
-      state.diceRoll = null;
+      state.diceRoll = [0, 0];
       state.specialCells = generateSpecialCells();
       state.popupMessage = null;
     },
