@@ -1,4 +1,41 @@
-const GameBoard = ({ board, players, specialCells = {} }) => {
+import React, { useEffect, useState } from "react";
+import { useSelector, useDispatch } from "react-redux";
+import { completeMove } from "../gameSlice";
+
+const GameBoard = ({ board, specialCells = {} }) => {
+  const dispatch = useDispatch();
+  const players = useSelector((state) => state.game.players);
+  const playerAnimations = useSelector((state) => state.game.playerAnimations);
+  const [highlightedCells, setHighlightedCells] = useState([null, null]);
+
+  useEffect(() => {
+    playerAnimations.forEach((animation, playerIndex) => {
+      if (animation) {
+        const { startPosition, targetPosition } = animation;
+        const steps = Array.from({ length: targetPosition - startPosition }, (_, i) => startPosition + i + 1);
+        animatePlayer(playerIndex, steps);
+      }
+    });
+  }, [playerAnimations]);
+
+  const animatePlayer = (playerIndex, steps) => {
+    let stepIndex = 0;
+
+    const interval = setInterval(() => {
+      if (stepIndex < steps.length) {
+        setHighlightedCells((prev) => {
+          const newHighlights = [...prev];
+          newHighlights[playerIndex] = steps[stepIndex];
+          return newHighlights;
+        });
+        stepIndex++;
+      } else {
+        clearInterval(interval);
+        dispatch(completeMove({ playerIndex, finalPosition: steps[steps.length - 1] }));
+      }
+    }, 300); // Animation speed
+  };
+
   return (
     <div className="game-board">
       {board.map((row, rowIndex) => (
@@ -6,27 +43,26 @@ const GameBoard = ({ board, players, specialCells = {} }) => {
           {row.map((cell) => {
             const isPlayer1 = players[0] === cell;
             const isPlayer2 = players[1] === cell;
+            const isHighlighted1 = highlightedCells[0] === cell;
+            const isHighlighted2 = highlightedCells[1] === cell;
             const isBothPlayers = isPlayer1 && isPlayer2;
+            const isSpecial = specialCells[cell];
 
-            const specialCell = specialCells[cell]; // Access specialCells using the cell number
+            const cellClasses = [
+              "cell",
+              isPlayer1 ? "player1" : "",
+              isPlayer2 ? "player2" : "",
+              isBothPlayers ? "both-players" : "",
+              isHighlighted1 ? "animate player1" : "",
+              isHighlighted2 ? "animate player2" : "",
+              isSpecial ? "special" : "",
+            ]
+              .filter(Boolean)
+              .join(" ");
 
             return (
-              <div
-                key={cell}
-                className={`cell 
-                  ${isPlayer1 ? 'player1' : ''} 
-                  ${isPlayer2 ? 'player2' : ''} 
-                  ${isBothPlayers ? 'both-players' : ''} 
-                  ${!isPlayer1 && !isPlayer2 && specialCell ? 'special' : ''}`}
-              >
+              <div key={cell} className={cellClasses}>
                 {cell}
-                {specialCell && (
-                  <div className="special-cell">
-                    {specialCell.type === 'position'
-                      ? `⇅ ${specialCell.value}`
-                      : `⚡ ${specialCell.value}`}
-                  </div>
-                )}
               </div>
             );
           })}
