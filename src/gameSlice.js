@@ -1,4 +1,4 @@
-import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
+import { createSlice } from '@reduxjs/toolkit';
 
 const BOARD_SIZE = 100;
 
@@ -67,13 +67,6 @@ const initialState = {
   playerAnimations: [null, null],
 };
 
-export const delayedCompleteMove = createAsyncThunk(
-  'game/delayedCompleteMove',
-  async ({ playerIndex, finalPosition }, { dispatch }) => {
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-    dispatch(completeMove({ playerIndex, finalPosition }));
-  }
-);
 
 const gameSlice = createSlice({
   name: 'game',

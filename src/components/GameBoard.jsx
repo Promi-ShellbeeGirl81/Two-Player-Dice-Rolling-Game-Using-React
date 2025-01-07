@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { completeMove } from "../gameSlice";
+import styles from "./GameBoard.module.css"; 
 
 const GameBoard = ({ board, specialCells = {} }) => {
   const dispatch = useDispatch();
@@ -9,7 +10,6 @@ const GameBoard = ({ board, specialCells = {} }) => {
   const [highlightedCells, setHighlightedCells] = useState([null, null]);
 
   useEffect(() => {
-    // Trigger animation for players that need it
     playerAnimations.forEach((animation, playerIndex) => {
       if (animation) {
         animatePlayer(playerIndex);
@@ -21,21 +21,30 @@ const GameBoard = ({ board, specialCells = {} }) => {
     const animation = playerAnimations[playerIndex];
     if (animation) {
       const { startPosition, targetPosition } = animation;
-
+  
       const steps = Array.from({ length: targetPosition - startPosition }, (_, i) => startPosition + i + 1);
-
+  
       let stepIndex = 0;
+      
+      setHighlightedCells((prev) => {
+        const newHighlights = [...prev];
+        newHighlights[playerIndex] = steps[stepIndex]; 
+        return newHighlights;
+      });
+  
       const interval = setInterval(() => {
         if (stepIndex < steps.length) {
+          stepIndex++;
+  
           setHighlightedCells((prev) => {
             const newHighlights = [...prev];
             newHighlights[playerIndex] = steps[stepIndex];
             return newHighlights;
           });
-          stepIndex++;
+  
         } else {
           clearInterval(interval);
-
+  
           setTimeout(() => {
             const finalPosition = steps[steps.length - 1];
             dispatch(completeMove({ playerIndex, finalPosition }));
@@ -43,12 +52,12 @@ const GameBoard = ({ board, specialCells = {} }) => {
         }
       }, 300);
     }
-  };
+  };  
 
   return (
-    <div className="game-board">
+    <div className={styles.gameBoard}>
       {board.map((row, rowIndex) => (
-        <div key={rowIndex} className="row">
+        <div key={rowIndex} className={styles.row}>
           {row.map((cell) => {
             const isPlayer1 = players[0] === cell;
             const isPlayer2 = players[1] === cell;
@@ -57,12 +66,12 @@ const GameBoard = ({ board, specialCells = {} }) => {
 
             const isSpecialCell = specialCells[cell];
             const cellClasses = [
-              "cell",
-              isPlayer1 ? "player1" : "",
-              isPlayer2 ? "player2" : "",
-              isHighlighted1 ? "animate player1" : "",
-              isHighlighted2 ? "animate player2" : "",
-              isSpecialCell ? "special-cell" : "",
+              styles.cell,
+              isPlayer1 ? styles.player1 : "",
+              isPlayer2 ? styles.player2 : "",
+              isHighlighted1 ? styles.animatePlayer1 : "",
+              isHighlighted2 ? styles.animatePlayer2 : "",
+              isSpecialCell ? styles.specialCell : "",
             ]
               .filter(Boolean)
               .join(" ");
@@ -76,14 +85,12 @@ const GameBoard = ({ board, specialCells = {} }) => {
               >
                 {cell}
               </div>
-
             );
           })}
         </div>
       ))}
     </div>
   );
-
 };
 
 export default GameBoard;

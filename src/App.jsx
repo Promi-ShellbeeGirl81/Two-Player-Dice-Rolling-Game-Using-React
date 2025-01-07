@@ -34,12 +34,12 @@ const App = () => {
           </div>
         </div>
         <div className="middlebox">
+          <div className="game-info">
+            <GameInfo currentPlayer={currentPlayer} />
+          </div>
           <div className="board-container">
             <GameBoard board={board} players={players} specialCells={specialCells} playerAnimations={playerAnimations}
               onCompleteMove={handleCompleteMove} />
-          </div>
-          <div className="game-info">
-            <GameInfo currentPlayer={currentPlayer} />
           </div>
           <div className="bottom-controls">
             <GameControls onReset={handleReset} />
