@@ -4,12 +4,16 @@ import { useSelector } from 'react-redux';
 const GameInfo = ({ currentPlayer }) => {
   const popupMessage = useSelector((state) => state.game.popupMessage);
 
+  const playerColorClass = currentPlayer === 0 ? 'blue' : 'red';
+
   return (
     <div className="game-info">
       <div>
         {popupMessage && <div className="popup-message">{popupMessage}</div>}
       </div>
-      <div>Current Player: {currentPlayer + 1}</div>
+      <div className={`current-player ${playerColorClass}`}>
+        &nbsp;Current Player: {currentPlayer + 1}
+      </div>
     </div>
   );
 };
