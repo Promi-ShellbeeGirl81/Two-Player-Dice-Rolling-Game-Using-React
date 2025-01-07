@@ -7,6 +7,7 @@ import styles from "./GameControls.module.css";
 const GameControls = () => {
   const dispatch = useDispatch();
   const { attempts, currentPlayer } = useSelector((state) => state.game);
+  const isAnimating = useSelector((state) => state.game.isAnimating); // Get animation status
 
   const handleRollDice = () => {
     dispatch(rollDice());
@@ -24,7 +25,7 @@ const GameControls = () => {
       <button
         className={`${styles.rollDiceButton} ${buttonClass}`} 
         onClick={handleRollDice}
-        disabled={attempts[0] === 0 && attempts[1] === 0}
+        disabled={isAnimating || attempts[0] === 0 && attempts[1] === 0} // Disable if animating or no attempts left
       >
         Roll Dice (Player {currentPlayer + 1})
       </button>

@@ -65,8 +65,8 @@ const initialState = {
   diceRoll: [0, 0],
   popupMessage: null,
   playerAnimations: [null, null],
+  isAnimating: false, 
 };
-
 
 const gameSlice = createSlice({
   name: 'game',
@@ -107,11 +107,6 @@ const gameSlice = createSlice({
         state.popupMessage = `Player ${currentPlayer + 1} moved to position ${newPosition}! `;
       }
 
-      if (newPosition === BOARD_SIZE) {
-        state.popupMessage = `Player ${currentPlayer + 1} wins! Congratulations!`;
-        return;
-      }
-
       const specialCell = state.specialCells[newPosition];
       if (specialCell) {
         if (specialCell.type === 'position') {
@@ -126,12 +121,19 @@ const gameSlice = createSlice({
       }
 
       state.players[currentPlayer] = newPosition;
+      state.playerAnimations[currentPlayer] = { startPosition, targetPosition: newPosition };
+
+      if (newPosition === BOARD_SIZE) {
+        state.popupMessage = null; 
+        setTimeout(() => {
+          state.popupMessage = `Player ${currentPlayer + 1} wins! Congratulations!`;
+        }, 2000); 
+        return;
+      }
 
       if (state.attempts[currentPlayer] > 0) {
         state.attempts[currentPlayer] -= 1;
       }
-
-      state.playerAnimations[currentPlayer] = { startPosition, targetPosition: newPosition };
 
       if (state.attempts[0] === 0 && state.attempts[1] === 0) {
         state.popupMessage = "Both players have no attempts left! The game is over!";
