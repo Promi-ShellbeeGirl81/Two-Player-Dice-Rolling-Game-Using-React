@@ -52,5 +52,8 @@ export const generateSpecialCells = () => {
     return board;
   };
   
-  export const generateAttempts = () => [Math.floor(Math.random() * 11) + 30, Math.floor(Math.random() * 11) + 30];
+  export const generateAttempts = () => {
+    const attempts = Math.floor(Math.random() * 11) + 30; 
+    return [attempts, attempts]; 
+  };
   
