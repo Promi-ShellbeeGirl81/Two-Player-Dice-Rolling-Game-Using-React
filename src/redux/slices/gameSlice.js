@@ -1,60 +1,6 @@
 import { createSlice } from '@reduxjs/toolkit';
-
-const BOARD_SIZE = 100;
-
-const generateSpecialCells = () => {
-  const numSpecialCells = Math.floor(Math.random() * 3) + 7;
-  const specialCells = {};
-
-  Array.from({ length: numSpecialCells }).forEach(() => {
-    let cell;
-    do {
-      cell = Math.floor(Math.random() * (BOARD_SIZE - 8)) + 8;
-    } while (specialCells[cell] || cell < 8 || cell > 97);
-
-    const effectType = Math.random() > 0.5 ? 'position' : 'attempts';
-    let value;
-
-    if (effectType === 'position') {
-      if (cell >= 90) {
-        do {
-          value = Math.floor(Math.random() * 6) - 6;
-        } while (value === 0);
-      } else if (cell <= 10) {
-        do {
-          value = Math.floor(Math.random() * 6) + 1;
-        } while (value === 0);
-      } else {
-        do {
-          value = Math.floor(Math.random() * 13) - 6;
-        } while (value === 0);
-      }
-    } else {
-      do {
-        value = Math.floor(Math.random() * 11) - 5;
-      } while (value === 0);
-    }
-    specialCells[cell] = { type: effectType, value };
-  });
-
-  return specialCells;
-};
-
-const generateBoard = () => {
-  const board = [];
-
-  for (let i = 0; i < 10; i++) {
-    const row = [];
-    for (let j = 0; j < 10; j++) {
-      if (i % 2 == 0) row.push(i * 10 + j + 1);
-      else row.push(i * 10 + 10 - j);
-    }
-    board.push(row);
-  }
-  return board;
-};
-
-const generateAttempts = () => [Math.floor(Math.random() * 11) + 30, Math.floor(Math.random() * 11) + 30];
+import { BOARD_SIZE } from '../constants/constants'; 
+import { generateBoard, generateSpecialCells, generateAttempts } from '../utils/utils';
 
 const initialState = {
   board: generateBoard(),
@@ -63,9 +9,10 @@ const initialState = {
   attempts: generateAttempts(),
   currentPlayer: 0,
   diceRoll: [0, 0],
+  diceImages: ['', ''], 
   popupMessage: null,
   playerAnimations: [null, null],
-  isAnimating: false, 
+  isAnimating: false,
 };
 
 const gameSlice = createSlice({
@@ -73,12 +20,19 @@ const gameSlice = createSlice({
   initialState,
   reducers: {
     rollDice: (state) => {
-      const dice = Math.floor(Math.random() * 6) + 1;
       const currentPlayer = state.currentPlayer;
+      state.diceImages[currentPlayer] = `/images/ludo.gif`; 
+      if (state.isAnimating) return;
+      state.isAnimating = true;
+      console.log("After rollDice: isAnimating =", state.isAnimating);
+
+      const dice = Math.floor(Math.random() * 6) + 1;
       let startPosition = state.players[currentPlayer];
       let newPosition = startPosition;
 
       state.diceRoll[currentPlayer] = dice;
+      state.diceImages[currentPlayer] = `/images/${dice}.png`; 
+      state.isAnimating = true;
 
       if (startPosition === 0) {
         if (dice === 1) {
@@ -94,6 +48,7 @@ const gameSlice = createSlice({
           if (state.attempts[1 - currentPlayer] > 0) {
             state.currentPlayer = 1 - currentPlayer;
           }
+          state.isAnimating = false;
           return;
         }
       } else {
@@ -101,6 +56,7 @@ const gameSlice = createSlice({
 
         if (dice > stepsTo100) {
           state.popupMessage = `Player ${currentPlayer + 1} rolled a ${dice}, but needs exactly ${stepsTo100} to reach 100! Try again!`;
+          state.isAnimating = false;
           return;
         }
         newPosition += dice;
@@ -124,8 +80,8 @@ const gameSlice = createSlice({
       state.playerAnimations[currentPlayer] = { startPosition, targetPosition: newPosition };
 
       if (newPosition === BOARD_SIZE) {
-        state.popupMessage = null; 
         setTimeout(() => {
+          state.isAnimating = false; 
           state.popupMessage = `Player ${currentPlayer + 1} wins! Congratulations!`;
         }, 2000); 
         return;
@@ -151,6 +107,7 @@ const gameSlice = createSlice({
       const { playerIndex, finalPosition } = action.payload;
       state.players[playerIndex] = finalPosition;
       state.playerAnimations[playerIndex] = null;
+      state.isAnimating = false;
     },
     resetGame: (state) => {
       state.players = [0, 0];

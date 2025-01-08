@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
-import { completeMove } from "../gameSlice";
+import { completeMove } from "../redux/slices/gameSlice";
 import styles from "./GameBoard.module.css"; 
 
 const GameBoard = ({ board, specialCells = {} }) => {

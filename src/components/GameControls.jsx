@@ -1,13 +1,14 @@
 import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { rollDice, resetGame } from '../gameSlice';
-import { setMessage } from '../modalSlice';
-import styles from "./GameControls.module.css"; 
+import { rollDice, resetGame } from '../redux/slices/gameSlice';
+import { setMessage } from '../redux/slices/modalSlice';
+import styles from "./GameControls.module.css";
 
 const GameControls = () => {
   const dispatch = useDispatch();
   const { attempts, currentPlayer } = useSelector((state) => state.game);
-  const isAnimating = useSelector((state) => state.game.isAnimating); // Get animation status
+  const isAnimating = useSelector((state) => state.game.isAnimating); 
+  console.log("isAnimating in GameControls:", isAnimating);
 
   const handleRollDice = () => {
     dispatch(rollDice());
@@ -23,9 +24,9 @@ const GameControls = () => {
   return (
     <div className={styles.controls}>
       <button
-        className={`${styles.rollDiceButton} ${buttonClass}`} 
+        className={`${styles.rollDiceButton} ${buttonClass}`}
         onClick={handleRollDice}
-        disabled={isAnimating || attempts[0] === 0 && attempts[1] === 0} // Disable if animating or no attempts left
+        disabled={isAnimating || (attempts[0] === 0 && attempts[1] === 0)} 
       >
         Roll Dice (Player {currentPlayer + 1})
       </button>

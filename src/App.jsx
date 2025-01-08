@@ -5,7 +5,7 @@ import PlayerStats from './components/PlayerStats';
 import GameControls from './components/GameControls';
 import GameInfo from './components/GameInfo';
 import { useSelector, useDispatch } from 'react-redux';
-import { resetGame } from './gameSlice';
+import { resetGame } from './redux/slices/gameSlice';
 
 const App = () => {
   const { board, players, attempts, currentPlayer, specialCells, diceRoll, playerAnimations } = useSelector((state) => state.game);
