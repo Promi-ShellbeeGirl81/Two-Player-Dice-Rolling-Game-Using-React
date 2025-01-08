@@ -20,6 +20,7 @@ const gameSlice = createSlice({
   initialState,
   reducers: {
     rollDice: (state) => {
+      console.log("chole");
       const currentPlayer = state.currentPlayer;
       if (state.isAnimating) return;
       state.isAnimating = true;
