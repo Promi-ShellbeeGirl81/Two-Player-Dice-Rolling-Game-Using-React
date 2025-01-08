@@ -36,9 +36,18 @@
 }
 
 .cell.bothPlayers {
-  background: linear-gradient(to right, blue 50%, red 50%);
+  background-color: gray; 
 }
 
+.cell.bothPlayers .player1 {
+  background-color: blue;
+  opacity: 0.6; 
+}
+
+.cell.bothPlayers .player2 {
+  background-color: red;
+  opacity: 0.6; 
+}
 .cell.specialCell {
   background-color: rgb(122, 17, 122);
   color: #ddd;
