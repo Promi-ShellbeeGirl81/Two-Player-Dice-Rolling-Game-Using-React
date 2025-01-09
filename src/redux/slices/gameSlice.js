@@ -13,6 +13,7 @@ const initialState = {
   popupMessage: null,
   playerAnimations: [null, null],
   isAnimating: false,
+  gameOver: false,
 };
 
 const gameSlice = createSlice({
@@ -20,9 +21,8 @@ const gameSlice = createSlice({
   initialState,
   reducers: {
     rollDice: (state) => {
-      console.log("chole");
       const currentPlayer = state.currentPlayer;
-      if (state.isAnimating) return;
+      if (state.gameOver || state.isAnimating) return;
       state.isAnimating = true;
 
       if (state.attempts[currentPlayer] === 0) {
@@ -76,7 +76,7 @@ const gameSlice = createSlice({
 
       let specialCell = state.specialCells[newPosition];
 
-      while (specialCell) {
+      if (specialCell) {
         if (specialCell.type === 'position') {
          newPosition = Math.max(1, Math.min(BOARD_SIZE, newPosition + specialCell.value));
           state.popupMessage = `Player ${currentPlayer + 1} moved to position ${newPosition} due to special cell effect (position change: ${specialCell.value})! `;
@@ -99,6 +99,7 @@ const gameSlice = createSlice({
 
       if (newPosition === BOARD_SIZE) {
         state.isAnimating = false;
+        state.gameOver = true; 
         state.popupMessage = `Player ${currentPlayer + 1} wins! Congratulations!`;
         return;
       }

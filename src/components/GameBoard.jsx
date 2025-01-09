@@ -48,7 +48,7 @@ const GameBoard = React.memo(({ board, specialCells }) => {
           setTimeout(() => {
             const finalPosition = steps[steps.length - 1];
             dispatch(completeMove({ playerIndex, finalPosition }));
-          }, 300);
+          }, 500);
         }
       }, 300);
     }
@@ -67,7 +67,6 @@ const GameBoard = React.memo(({ board, specialCells }) => {
             const isSpecialCell = specialCells[cell];
             const bothPlayersOnCell = isPlayer1 && isPlayer2;
 
-            // Handle styling for the cell based on player positions and animations
             const cellClasses = [
               styles.cell,
               bothPlayersOnCell ? styles.bothPlayers : "",

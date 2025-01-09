@@ -42,3 +42,9 @@
     background-color: #fff;
     border: 2px solid chocolate;
 }
+
+.rollDiceButton:disabled {
+    background-color: #d3d3d3;  /* Light gray to indicate disabled state */
+    cursor: not-allowed;  /* Change the cursor to indicate it's disabled */
+    pointer-events: none;  /* Make sure the button is not interactive */
+  }
